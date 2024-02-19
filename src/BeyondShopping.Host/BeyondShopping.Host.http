@@ -1,0 +1,18 @@
+@host = http://localhost:5149
+
+### Create new order
+POST {{host}}/orders/
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "items": [
+    1
+  ]
+}
+
+### Complete an order
+PUT {{host}}/orders/1/complete
+
+### Get all orders by user id
+GET {{host}}/orders?userId=1
