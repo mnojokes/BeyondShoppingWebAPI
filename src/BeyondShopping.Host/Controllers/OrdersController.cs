@@ -1,7 +1,9 @@
 ﻿using BeyondShopping.Application.Services;
 using BeyondShopping.Contracts.Requests;
 using BeyondShopping.Contracts.Responses;
+using BeyondShopping.Host.SwaggerExamples;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
 
 #pragma warning disable 1591
 
@@ -32,8 +34,11 @@ public class OrdersController : Controller
     [HttpPost("orders")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(OrderResponse), 200)]
+    [SwaggerResponseExample(200, typeof(OrderResponseExample))]
     [ProducesResponseType(typeof(ErrorResponse), 400)]
+    [SwaggerResponseExample(400, typeof(ErrorResponseExample))]
     [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [SwaggerResponseExample(500, typeof(ErrorResponseExample))]
     public async Task<IActionResult> Create([FromBody] CreateOrderRequest order)
     {
         return Ok(await _orderService.CreateOrder(order));
@@ -46,15 +51,19 @@ public class OrdersController : Controller
     /// Marks the order as complete unless it has been less than 2 hours since its creation.<br />
     /// </remarks>
     /// <response code="200">Order completed</response>
-    /// <response code="400">Bad request, order expired</response>
-    /// <response code="404">Not found, order by that id does not exist</response>
+    /// <response code="400">Bad request: order expired</response>
+    /// <response code="404">Not found: order by that id does not exist</response>
     /// <response code="500">Server error, beyond the comprehension of any living soul</response>
     [HttpPut("orders/{id}/complete")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(OrderResponse), 200)]
+    [SwaggerResponseExample(200, typeof(OrderResponseExample))]
     [ProducesResponseType(typeof(ErrorResponse), 400)]
+    [SwaggerResponseExample(400, typeof(ErrorResponseExample))]
     [ProducesResponseType(typeof(ErrorResponse), 404)]
+    [SwaggerResponseExample(404, typeof(ErrorResponseExample))]
     [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [SwaggerResponseExample(500, typeof(ErrorResponseExample))]
     public async Task<IActionResult> CompleteOrder([FromRoute] int id)
     {
         return Ok(await _orderService.CompleteOrder(id));
@@ -67,13 +76,13 @@ public class OrdersController : Controller
     /// Shows just how much money we scammed off of a particular user.<br />
     /// </remarks>
     /// <response code="200">Orders successfully retrieved</response>
-    /// <response code="404">Not found, user by that id does not exist</response>
     /// <response code="500">Server error, beyond the comprehension of any living soul</response>
     [HttpGet("orders")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(OrderResponseList), 200)]
-    [ProducesResponseType(typeof(ErrorResponse), 404)]
+    [SwaggerResponseExample(200, typeof(OrderResponseExample))]
     [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [SwaggerResponseExample(500, typeof(ErrorResponseExample))]
     public async Task<IActionResult> Get([FromQuery] int userId)
     {
         return Ok(await _orderService.GetUserOrders(userId));
