@@ -7,6 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Scripts\Script0001 - CreateOrders.sql" />
+    <None Remove="Scripts\Script0002 - CreateOrdersItems.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\Script0001 - CreateOrders.sql" />
+    <EmbeddedResource Include="Scripts\Script0002 - CreateOrdersItems.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.28" />
+    <PackageReference Include="dbup-postgresql" Version="5.0.40" />
+    <PackageReference Include="Npgsql" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BeyondShopping.Application\BeyondShopping.Application.csproj" />
   </ItemGroup>
 
