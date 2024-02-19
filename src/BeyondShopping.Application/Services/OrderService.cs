@@ -40,7 +40,10 @@ public class OrderService
             throw new DataValidationException(ValidationErrorUtility.GetAllValidationErrorMessages(result));
         }
 
-        throw new NotImplementedException();
+        OrderDataModel response = await _orderRepository.Create(
+            new OrderDataModel(0, request.UserId, "Pending", DateTime.UtcNow));
+
+        return new OrderResponse(response.Id, response.Status, response.CreatedAt);
     }
 
     public async Task<OrderResponse> CompleteOrder(int id)
@@ -51,7 +54,8 @@ public class OrderService
             throw new DataValidationException(ValidationErrorUtility.GetAllValidationErrorMessages(result));
         }
 
-        throw new NotImplementedException();
+        OrderDataModel response = await _orderRepository.UpdateStatus(new OrderStatusModel(id, "Completed"));
+        return new OrderResponse(response.Id, response.Status, response.CreatedAt);
     }
 
     public async Task<OrderResponseList> GetUserOrders(int userId)
@@ -64,9 +68,7 @@ public class OrderService
 
         List<OrderDataModel> orders = (await _orderRepository.Get(userId)).ToList();
 
-
-
-        throw new NotImplementedException();
+        return new OrderResponseList(orders.Select(o => new OrderResponse(o.UserId, o.Status, o.CreatedAt)).ToList());
     }
 
     public async Task CleanupExpiredOrders()

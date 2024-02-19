@@ -29,7 +29,6 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
-
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 
