@@ -9,15 +9,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{AB4D4616
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondShopping.Host", "src\BeyondShopping.Host\BeyondShopping.Host.csproj", "{0D183093-0D36-4F31-A899-22FD1C75A0AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondShopping.Infrastructure", "src\BeyondShopping.Infrastructure\BeyondShopping.Infrastructure.csproj", "{ABC6D446-6B0A-4BC6-A4C9-94D341D2AA91}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondShopping.Infrastructure", "src\BeyondShopping.Infrastructure\BeyondShopping.Infrastructure.csproj", "{ABC6D446-6B0A-4BC6-A4C9-94D341D2AA91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondShopping.Application", "src\BeyondShopping.Application\BeyondShopping.Application.csproj", "{F50A2746-D753-475B-A285-A33CA4C07D6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondShopping.Application", "src\BeyondShopping.Application\BeyondShopping.Application.csproj", "{F50A2746-D753-475B-A285-A33CA4C07D6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondShopping.Core", "src\BeyondShopping.Core\BeyondShopping.Core.csproj", "{7A2C00FB-CD16-4833-AF99-CB458910F60E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondShopping.Core", "src\BeyondShopping.Core\BeyondShopping.Core.csproj", "{7A2C00FB-CD16-4833-AF99-CB458910F60E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondShopping.Contracts", "src\BeyondShopping.Contracts\BeyondShopping.Contracts.csproj", "{C4DC95BF-3407-4A90-95D1-D632D857B181}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondShopping.Clients", "src\BeyondShopping.Clients\BeyondShopping.Clients.csproj", "{7F58BAE3-C9AE-462F-80C5-4A2C85B03C1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondShopping.Contracts", "src\BeyondShopping.Contracts\BeyondShopping.Contracts.csproj", "{C4DC95BF-3407-4A90-95D1-D632D857B181}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,10 +43,6 @@ Global
 		{C4DC95BF-3407-4A90-95D1-D632D857B181}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4DC95BF-3407-4A90-95D1-D632D857B181}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4DC95BF-3407-4A90-95D1-D632D857B181}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F58BAE3-C9AE-462F-80C5-4A2C85B03C1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F58BAE3-C9AE-462F-80C5-4A2C85B03C1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F58BAE3-C9AE-462F-80C5-4A2C85B03C1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F58BAE3-C9AE-462F-80C5-4A2C85B03C1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,7 +53,6 @@ Global
 		{F50A2746-D753-475B-A285-A33CA4C07D6C} = {4AF6B2E4-F781-4EE4-8701-BC726E2F99BD}
 		{7A2C00FB-CD16-4833-AF99-CB458910F60E} = {4AF6B2E4-F781-4EE4-8701-BC726E2F99BD}
 		{C4DC95BF-3407-4A90-95D1-D632D857B181} = {4AF6B2E4-F781-4EE4-8701-BC726E2F99BD}
-		{7F58BAE3-C9AE-462F-80C5-4A2C85B03C1C} = {4AF6B2E4-F781-4EE4-8701-BC726E2F99BD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AA394122-2F1A-46E6-916A-BD4D96812B69}

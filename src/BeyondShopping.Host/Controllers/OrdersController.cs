@@ -29,7 +29,7 @@ public class OrdersController : Controller
     /// * Billions of users with weird names and stock photos from the internet trust us, so we're definitely legit!
     /// </remarks>
     /// <response code="200">Order created</response>
-    /// <response code="400">Bad request, faulty order data</response>
+    /// <response code="400">Bad request, problem with order data or user id</response>
     /// <response code="500">Server error, beyond the comprehension of any living soul</response>
     [HttpPost("orders")]
     [Produces("application/json")]

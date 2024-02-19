@@ -31,6 +31,7 @@ public class ExceptionHandlingMiddleware
             response.StatusCode = exception switch
             {
                 DataNotFoundException => (int)HttpStatusCode.NotFound,
+                UserNotFoundException => (int)HttpStatusCode.BadRequest,
                 DataValidationException => (int)HttpStatusCode.BadRequest,
                 InvalidOperationException => (int)HttpStatusCode.BadRequest,
                 _ => (int)HttpStatusCode.InternalServerError
