@@ -4,7 +4,7 @@
 A restful API implementing the following functionality simulating an ordering system:  
 * An order is created when a user wants to buy an item on the marketplace
 * The seller can deliver the item and mark the order as completed.
-* The orders that are not paid within 2 hours of creation need to be automatically deleted from the system. (not implemented due to time contraints)
+* The orders that are not paid within 2 hours of creation need to be automatically deleted from the system. (hosted service not implemented due to time contraints, but service/db logic is present)
 * A user is able to retrieve all of their orders.
 
 User information is hosted on another system and can be fetched from: https://jsonplaceholder.typicode.com/users  
