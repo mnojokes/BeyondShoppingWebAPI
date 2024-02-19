@@ -1,4 +1,6 @@
+using BeyondShopping.Application;
 using BeyondShopping.Host.Middlewares;
+using BeyondShopping.Infrastructure;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 
@@ -12,16 +14,19 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo()
-        {
-            Title = builder.Configuration.GetValue<string>("SwaggerTitle") ?? string.Empty,
-            Description = builder.Configuration.GetValue<string>("SwaggerDescription") ?? string.Empty
-        });
+    {
+        Title = builder.Configuration.GetValue<string>("SwaggerTitle") ?? string.Empty,
+        Description = builder.Configuration.GetValue<string>("SwaggerDescription") ?? string.Empty
+    });
 
     // Set the comments path for the Swagger JSON and UI.
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
 });
+
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 

@@ -1,7 +1,7 @@
-﻿using BeyondShopping.Contracts.Requests;
+﻿using BeyondShopping.Application.Services;
+using BeyondShopping.Contracts.Requests;
 using BeyondShopping.Contracts.Responses;
 using Microsoft.AspNetCore.Mvc;
-using System.Runtime.Versioning;
 
 #pragma warning disable 1591
 
@@ -10,6 +10,13 @@ namespace BeyondShopping.Host.Controllers;
 [ApiController]
 public class OrdersController : Controller
 {
+    private readonly OrderService _orderService;
+
+    public OrdersController(OrderService orderService)
+    {
+        _orderService = orderService;
+    }
+
 #pragma warning restore 1591
     /// <summary>
     /// Create a new order.
@@ -29,7 +36,7 @@ public class OrdersController : Controller
     [ProducesResponseType(typeof(ErrorResponse), 500)]
     public async Task<IActionResult> Create([FromBody] CreateOrderRequest order)
     {
-        throw new NotImplementedException();
+        return Ok(await _orderService.CreateOrder(order));
     }
 
     /// <summary>
@@ -44,13 +51,13 @@ public class OrdersController : Controller
     /// <response code="500">Server error, beyond the comprehension of any living soul</response>
     [HttpPut("orders/{id}/complete")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(ErrorResponse), 200)]
+    [ProducesResponseType(typeof(OrderResponse), 200)]
     [ProducesResponseType(typeof(ErrorResponse), 400)]
     [ProducesResponseType(typeof(ErrorResponse), 404)]
     [ProducesResponseType(typeof(ErrorResponse), 500)]
     public async Task<IActionResult> CompleteOrder([FromRoute] int id)
     {
-        throw new NotImplementedException();
+        return Ok(await _orderService.CompleteOrder(id));
     }
 
     /// <summary>
@@ -69,6 +76,6 @@ public class OrdersController : Controller
     [ProducesResponseType(typeof(ErrorResponse), 500)]
     public async Task<IActionResult> Get([FromQuery] int userId)
     {
-        throw new NotImplementedException();
+        return Ok(await _orderService.GetUserOrders(userId));
     }
 }

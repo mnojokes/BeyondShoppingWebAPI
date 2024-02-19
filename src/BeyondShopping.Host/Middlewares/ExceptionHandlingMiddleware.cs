@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+﻿using BeyondShopping.Contracts.Responses;
+using BeyondShopping.Core.Exceptions;
 using System.Net;
 using System.Text.Json;
-using System.Threading.Tasks;
-using BeyondShopping.Contracts.Responses;
-using BeyondShopping.Core.Exceptions;
 
 #pragma warning disable 1591
 
