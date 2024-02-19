@@ -1,6 +1,6 @@
 ﻿namespace BeyondShopping.Core.Models;
 
-public record OrderModel(
+public record OrderDataModel(
     int Id,
     int UserId,
     string Status,

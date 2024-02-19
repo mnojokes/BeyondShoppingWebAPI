@@ -10,8 +10,4 @@
     <ProjectReference Include="..\BeyondShopping.Application\BeyondShopping.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Repositories\" />
-  </ItemGroup>
-
 </Project>
