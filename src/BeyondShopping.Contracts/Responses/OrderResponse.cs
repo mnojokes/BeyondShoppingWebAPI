@@ -1,4 +1,13 @@
 ﻿namespace BeyondShopping.Contracts.Responses;
 
-public record OrderResponse(int Id, string Status, DateTime CreatedAt);
-public record OrderResponseList(List<OrderResponse> Orders);
+public class OrderResponse
+{
+    public int Id { get; set; } = default;
+    public string Status { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = default;
+}
+
+public class OrderResponseList
+{
+    public List<OrderResponse>? Orders { get; set; } = null;
+}

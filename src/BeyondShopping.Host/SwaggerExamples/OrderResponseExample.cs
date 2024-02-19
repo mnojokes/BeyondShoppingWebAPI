@@ -9,6 +9,11 @@ public class OrderResponseExample : IExamplesProvider<OrderResponse>
 {
     public OrderResponse GetExamples()
     {
-        return new OrderResponse(123, "Completed", DateTime.Now);
+        return new OrderResponse()
+        {
+            Id = 123,
+            Status = "Completed",
+            CreatedAt = DateTime.UtcNow
+        };
     }
 }

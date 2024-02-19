@@ -7,6 +7,7 @@ using BeyondShopping.Core.Models;
 using BeyondShopping.Core.Utilities;
 using FluentValidation.Results;
 using Microsoft.Extensions.Configuration;
+using Moq;
 
 namespace BeyondShopping.Application.Services;
 
@@ -14,6 +15,7 @@ public class OrderService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOrderRepository _orderRepository;
+    private readonly IItemRepository _itemRepository;
     private readonly IdValidator _idValidator;
     private readonly CreateOrderRequestValidator _createOrderRequestValidator;
     private readonly int _cleanupMinutes;
@@ -31,6 +33,12 @@ public class OrderService
         _idValidator = idValidator;
         _createOrderRequestValidator = createOrderRequestValidator;
 
+///// Create a mock item repository. Replace with proper dependency injection if actual item inventory keeping is implemented.
+        Mock<IItemRepository> itemRepoMock = new Mock<IItemRepository>();
+        itemRepoMock.Setup(r => r.Get(It.IsAny<int>())).Returns(Task.FromResult("Item"));
+        _itemRepository = new Mock<IItemRepository>().Object;
+//////////
+
         string expiryPeriodSection = "PendingOrderExpiryTimeMinutes";
         _cleanupMinutes = int.Parse(configuration[expiryPeriodSection] ??
             throw new ArgumentNullException(expiryPeriodSection));
@@ -44,11 +52,24 @@ public class OrderService
     {
         ValidateOrderRequest(request);
         await ValidateUser(request.UserId);
+        foreach (var item in request.Items!)
+        {
+            await ValidateItem(item);
+        }
+
+        // TODO: create a transaction scope to ensure that the entire order is stored correctly
 
         OrderDataModel response = await _orderRepository.Create(
             new OrderDataModel(0, request.UserId, "Pending", DateTime.UtcNow));
 
-        return new OrderResponse(response.Id, response.Status, response.CreatedAt);
+        // TODO: store order_item relation in orders_items table
+
+        return new OrderResponse()
+        {
+            Id = response.Id,
+            Status = response.Status,
+            CreatedAt = response.CreatedAt
+        };
     }
 
     public async Task<OrderResponse> CompleteOrder(int id)
@@ -56,7 +77,12 @@ public class OrderService
         ValidateId(id);
 
         OrderDataModel response = await _orderRepository.UpdateStatus(new OrderStatusModel(id, "Completed"));
-        return new OrderResponse(response.Id, response.Status, response.CreatedAt);
+        return new OrderResponse()
+        {
+            Id = response.Id,
+            Status = response.Status,
+            CreatedAt = response.CreatedAt
+        };
     }
 
     public async Task<OrderResponseList> GetUserOrders(int userId)
@@ -66,7 +92,15 @@ public class OrderService
 
         List<OrderDataModel> orders = (await _orderRepository.Get(userId)).ToList();
 
-        return new OrderResponseList(orders.Select(o => new OrderResponse(o.UserId, o.Status, o.CreatedAt)).ToList());
+        return new OrderResponseList()
+        {
+            Orders = orders.Select(o => new OrderResponse()
+            {
+                Id = o.Id,
+                Status = o.Status,
+                CreatedAt = o.CreatedAt
+            }).ToList()
+        };
     }
 
     public async Task CleanupExpiredOrders()
@@ -108,6 +142,18 @@ public class OrderService
         catch
         {
             throw new Exception("Error validating user data.");
+        }
+    }
+
+    private async Task ValidateItem(int id)
+    {
+        try
+        {
+            await _itemRepository.Get(id);
+        }
+        catch
+        {
+            throw new Exception("Item does not exist.");
         }
     }
 }

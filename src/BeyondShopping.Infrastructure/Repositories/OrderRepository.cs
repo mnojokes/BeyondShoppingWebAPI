@@ -1,27 +1,76 @@
 ﻿using BeyondShopping.Core.Interfaces;
 using BeyondShopping.Core.Models;
+using Dapper;
+using System.Data;
+using System.Windows.Markup;
 
 namespace BeyondShopping.Infrastructure.Repositories;
 
 public class OrderRepository : IOrderRepository
 {
-    public Task CleanupOlderThan(DateTime time)
+    private readonly IDbConnection _dbConnection;
+    public OrderRepository(IDbConnection dbConnection)
     {
-        throw new NotImplementedException();
+        _dbConnection = dbConnection;
     }
 
-    public Task<OrderDataModel> Create(OrderDataModel order)
+    public async Task CleanupOlderThan(DateTime time)
     {
-        throw new NotImplementedException();
+        string query = @"DELETE FROM orders
+                        WHERE status = @status AND created_at < @time";
+
+        var queryParameters = new
+        {
+            status = "Pending",
+            time = time
+        };
+
+        await _dbConnection.ExecuteAsync(query, queryParameters);
     }
 
-    public Task<IEnumerable<OrderDataModel>> Get(int userId)
+    public async Task<OrderDataModel> Create(OrderDataModel order)
     {
-        throw new NotImplementedException();
+        string query = @"INSERT INTO orders (user_id, status, created_at)
+                        VALUES (@user_id, @status, @created_at)
+                        RETURNING id";
+
+        var queryParameters = new
+        {
+            user_id = order.UserId,
+            status = order.Status,
+            created_at = order.CreatedAt
+        };
+
+        return new OrderDataModel(
+            await _dbConnection.QuerySingleAsync<int>(query, queryParameters),
+            order.UserId, order.Status, order.CreatedAt);
     }
 
-    public Task<OrderDataModel> UpdateStatus(OrderStatusModel status)
+    public async Task<IEnumerable<OrderDataModel>> Get(int userId)
     {
-        throw new NotImplementedException();
+        string query = @"SELECT * FROM orders
+                        WHERE user_id = @user_id";
+
+        var queryParameters = new
+        {
+            user_id = userId
+        };
+
+        return await _dbConnection.QueryAsync<OrderDataModel>(query, queryParameters);
+    }
+
+    public async Task<OrderDataModel> UpdateStatus(OrderStatusModel status)
+    {
+        string query = @"UPDATE orders
+                        SET status = @status
+                        WHERE id = @id";
+
+        var queryParameters = new
+        {
+            id = status.Id,
+            status = status.Status
+        };
+
+        return await _dbConnection.QuerySingleAsync<OrderDataModel>(query, queryParameters);
     }
 }

@@ -9,6 +9,9 @@ public class ErrorResponseExample : IExamplesProvider<ErrorResponse>
 {
     public ErrorResponse GetExamples()
     {
-        return new ErrorResponse("Something truly terrible just happened.");
+        return new ErrorResponse()
+        {
+            Message = "Something truly terrible just happened."
+        };
     }
 }

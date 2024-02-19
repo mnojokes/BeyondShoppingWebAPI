@@ -9,7 +9,10 @@ public class CreateOrderRequestExample : IExamplesProvider<CreateOrderRequest>
 {
     public CreateOrderRequest GetExamples()
     {
-        return new CreateOrderRequest(123,
-            new List<int> { 3, 18, 42 });
+        return new CreateOrderRequest()
+        {
+            UserId = 123,
+            Items = new List<int> { 3, 18, 42 }
+        };
     }
 }

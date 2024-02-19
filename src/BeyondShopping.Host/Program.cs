@@ -30,7 +30,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration.GetValue<string>("PostgreConnection"));
+builder.Services.AddInfrastructure(builder.Configuration.GetValue<string>("PostgreConnection")!);
 
 var app = builder.Build();
 
