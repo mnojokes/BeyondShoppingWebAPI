@@ -51,7 +51,7 @@ public class OrdersController : Controller
     /// Marks the order as complete unless it has been less than 2 hours since its creation.<br />
     /// </remarks>
     /// <response code="200">Order completed</response>
-    /// <response code="400">Bad request: order expired</response>
+    /// <response code="400">Bad request: order expired and cannot be completed</response>
     /// <response code="404">Not found: order by that id does not exist</response>
     /// <response code="500">Server error, beyond the comprehension of any living soul</response>
     [HttpPut("orders/{id}/complete")]
