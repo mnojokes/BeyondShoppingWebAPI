@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: BeyondShoppingDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+     - "5437:5432"
+
+  beyondshopping.host:
+    image: ${DOCKER_REGISTRY-}beyondshoppinghost
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    build:
+      context: .
+      dockerfile: src/BeyondShopping.Host/Dockerfile
+    depends_on:
+      - db
+    ports:
+     - "8090:8070"
+     - "8091:8071"

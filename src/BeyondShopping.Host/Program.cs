@@ -7,6 +7,12 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+string? envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+if (!string.IsNullOrEmpty(envName))
+{
+    builder.Configuration.AddJsonFile($"appsettings.{envName}.json", optional: true, reloadOnChange: true);
+}
+
 // Add services to the container.
 
 builder.Services.AddControllers();
