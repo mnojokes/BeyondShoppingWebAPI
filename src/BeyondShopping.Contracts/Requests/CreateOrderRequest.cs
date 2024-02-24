@@ -7,5 +7,5 @@ public record CreateOrderRequest
 
     public CreateOrderRequest() { }
     public CreateOrderRequest(int userId, List<int> items)
-        => Items = items;
+        => (UserId, Items) = (userId, items);
 }
