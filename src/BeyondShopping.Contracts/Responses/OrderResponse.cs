@@ -1,13 +1,21 @@
 ﻿namespace BeyondShopping.Contracts.Responses;
 
-public class OrderResponse
+public record OrderResponse
 {
-    public int Id { get; set; } = default;
-    public string Status { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; } = default;
+    public int Id { get; init; } = default;
+    public string Status { get; init; } = string.Empty;
+    public DateTime CreatedAt { get; init; } = default;
+
+    public OrderResponse() { }
+    public OrderResponse(int id, string status, DateTime createdAt)
+        => (Id, Status, CreatedAt) = (id, status, createdAt);
 }
 
-public class OrderResponseList
+public record OrderResponseList
 {
-    public List<OrderResponse>? Orders { get; set; } = null;
+    public List<OrderResponse>? Orders { get; init; } = null;
+
+    public OrderResponseList() { }
+    public OrderResponseList(List<OrderResponse> orders)
+        => Orders = orders;
 }

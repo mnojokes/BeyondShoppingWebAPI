@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using System.Data;
 using System.Reflection;
+using Dapper;
 
 namespace BeyondShopping.Infrastructure;
 
@@ -24,6 +25,8 @@ public static class DependencyInjection
             .LogToConsole()
             .Build()
             .PerformUpgrade();
+
+        DefaultTypeMap.MatchNamesWithUnderscores = true;
 
         if (!result.Successful)
         {

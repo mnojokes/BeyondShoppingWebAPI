@@ -1,7 +1,11 @@
 ﻿namespace BeyondShopping.Contracts.Requests;
 
-public class CreateOrderRequest
+public record CreateOrderRequest
 {
-    public int UserId { get; set; } = default;
-    public List<int>? Items { get; set; } = null;
+    public int UserId { get; init; } = default;
+    public List<int>? Items { get; init; } = null;
+
+    public CreateOrderRequest() { }
+    public CreateOrderRequest(int userId, List<int> items)
+        => Items = items;
 }

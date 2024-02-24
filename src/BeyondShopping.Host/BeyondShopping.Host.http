@@ -30,7 +30,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "userId": 9999,
+  "userId": 999999,
   "items": [
     1
   ]
@@ -51,5 +51,18 @@ Accept: application/json
 ### Complete an order
 PUT {{host}}/orders/1/complete
 
+### Try complete order (invalid id)
+PUT {{host}}/orders/0/complete
+
+### Try complete order (non-existent id)
+PUT {{host}}/orders/999999/complete
+
+
 ### Get all orders by user id
 GET {{host}}/orders?userId=1
+
+### Try get orders (invalid user id)
+GET {{host}}/orders?userId=0
+
+### Try get orders (non-existent user)
+GET {{host}}/orders?userId=999999

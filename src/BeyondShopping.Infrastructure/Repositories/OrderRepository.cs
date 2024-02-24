@@ -17,7 +17,7 @@ public class OrderRepository : IOrderRepository
     public async Task CleanupOlderThan(DateTime time)
     {
         string query = @"DELETE FROM orders
-                        WHERE status = @status AND created_at < @time";
+                        WHERE status = @status AND created_at <= @time";
 
         var queryParameters = new
         {
@@ -32,7 +32,7 @@ public class OrderRepository : IOrderRepository
     {
         string query = @"INSERT INTO orders (user_id, status, created_at)
                         VALUES (@user_id, @status, @created_at)
-                        RETURNING id";
+                        RETURNING *";
 
         var queryParameters = new
         {
@@ -41,9 +41,11 @@ public class OrderRepository : IOrderRepository
             created_at = order.CreatedAt
         };
 
-        return new OrderDataModel(
-            await _dbConnection.QuerySingleAsync<int>(query, queryParameters),
-            order.UserId, order.Status, order.CreatedAt);
+        return await _dbConnection.QuerySingleAsync<OrderDataModel>(query, queryParameters);
+
+        //return new OrderDataModel(
+           // await _dbConnection.QuerySingleAsync<int>(query, queryParameters),
+          //  order.UserId, order.Status, order.CreatedAt);
     }
 
     public async Task<IEnumerable<OrderDataModel>> Get(int userId)
@@ -63,7 +65,8 @@ public class OrderRepository : IOrderRepository
     {
         string query = @"UPDATE orders
                         SET status = @status
-                        WHERE id = @id";
+                        WHERE id = @id
+                        RETURNING *";
 
         var queryParameters = new
         {

@@ -59,17 +59,11 @@ public class OrderService
 
         // TODO: create a transaction scope to ensure that the entire order is stored correctly
 
-        OrderDataModel response = await _orderRepository.Create(
-            new OrderDataModel(0, request.UserId, "Pending", DateTime.UtcNow));
+        OrderDataModel response = await _orderRepository.Create(new OrderDataModel(0, request.UserId, "Pending", DateTime.UtcNow));
 
         // TODO: store order_item relation in orders_items table
 
-        return new OrderResponse()
-        {
-            Id = response.Id,
-            Status = response.Status,
-            CreatedAt = response.CreatedAt
-        };
+        return new OrderResponse(response.Id, response.Status, response.CreatedAt);
     }
 
     public async Task<OrderResponse> CompleteOrder(int id)

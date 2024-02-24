@@ -1,6 +1,10 @@
 ﻿namespace BeyondShopping.Contracts.Responses;
 
-public class ErrorResponse
+public record ErrorResponse
 {
-    public string Message { get; set; } = string.Empty;
+    public string Message { get; init; } = string.Empty;
+
+    public ErrorResponse() { }
+    public ErrorResponse(string message)
+        => Message = message;
 }
