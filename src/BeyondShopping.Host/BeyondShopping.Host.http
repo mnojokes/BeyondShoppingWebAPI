@@ -1,13 +1,50 @@
 @host = http://localhost:5149
 
-### Create new order
+### Create new order with valid user and item IDs
 POST {{host}}/orders/
 Content-Type: application/json
+Accept: application/json
 
 {
   "userId": 1,
   "items": [
     1
+  ]
+}
+
+### Try create new order with invalid user id (validation fail)
+POST {{host}}/orders/
+Content-Type: application/json
+Accept: application/json
+
+{
+  "userId": 0,
+  "items": [
+    1
+  ]
+}
+
+### Try create new oreder with invalid user id (user not found)
+POST {{host}}/orders/
+Content-Type: application/json
+Accept: application/json
+
+{
+  "userId": 9999,
+  "items": [
+    1
+  ]
+}
+
+### Try create new order with valid user id, invalid item id (fail validation)
+POST {{host}}/orders/
+Content-Type: application/json
+Accept: application/json
+
+{
+  "userId": 1,
+  "items": [
+    0
   ]
 }
 
