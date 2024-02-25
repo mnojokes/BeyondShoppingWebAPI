@@ -17,6 +17,8 @@ public static class DependencyInjection
 
         services.AddHttpClient("ClientWithExponentialBackoff")
             .AddPolicyHandler(GetRetryPolicy());
+
+        services.AddHostedService<PeriodicCleanupService>();
     }
 
     static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
