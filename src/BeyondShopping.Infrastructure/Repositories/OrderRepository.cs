@@ -27,7 +27,7 @@ public class OrderRepository : IOrderRepository
         await _dbConnection.ExecuteAsync(query, queryParameters);
     }
 
-    public async Task<OrderDataModel> Create(OrderDataModel order)
+    public async Task<OrderDataModel> Create(OrderDataModel order, IDbTransaction? transaction = null)
     {
         string query = @"INSERT INTO orders (user_id, status, created_at)
                         VALUES (@user_id, @status, @created_at)
@@ -40,7 +40,7 @@ public class OrderRepository : IOrderRepository
             created_at = order.CreatedAt
         };
 
-        return await _dbConnection.QuerySingleAsync<OrderDataModel>(query, queryParameters);
+        return await _dbConnection.QuerySingleAsync<OrderDataModel>(query, queryParameters, transaction);
     }
 
     public async Task<IEnumerable<OrderDataModel>> Get(int userId)
@@ -70,5 +70,39 @@ public class OrderRepository : IOrderRepository
         };
 
         return await _dbConnection.QuerySingleAsync<OrderDataModel>(query, queryParameters);
+    }
+
+    public IDbTransaction? OpenConnectionAndStartTransaction()
+    {
+        _dbConnection.Open();
+        return _dbConnection.BeginTransaction();
+    }
+
+    public void CloseConnectionAndCommit(IDbTransaction transaction)
+    {
+        string errMessage = string.Empty;
+        try
+        {
+            transaction.Commit();
+        }
+        catch
+        {
+            errMessage = "Database failure: changes reverted.";
+            try
+            {
+                transaction.Rollback();
+            }
+            catch
+            {
+                errMessage = "Database failure: transaction rollback failed.";
+            }
+
+            _dbConnection.Close();
+        }
+
+        if (!string.IsNullOrEmpty(errMessage))
+        {
+            throw new InvalidOperationException(errMessage);
+        }
     }
 }

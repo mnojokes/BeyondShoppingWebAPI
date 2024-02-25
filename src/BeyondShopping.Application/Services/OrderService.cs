@@ -8,6 +8,7 @@ using BeyondShopping.Core.Utilities;
 using FluentValidation.Results;
 using Microsoft.Extensions.Configuration;
 using Moq;
+using System.Data;
 
 namespace BeyondShopping.Application.Services;
 
@@ -52,11 +53,19 @@ public class OrderService
             await ValidateItem(item);
         }
 
-        // TODO: create a transaction scope to ensure that the entire order is stored correctly
+        OrderDataModel? response = null;
+        using (IDbTransaction? transaction = _orderRepository.OpenConnectionAndStartTransaction())
+        {
+            if (transaction == null)
+            {
+                throw new InvalidOperationException("Failed to initialize database transaction.");
+            }
 
-        OrderDataModel response = await _orderRepository.Create(new OrderDataModel(0, request.UserId, "Pending", DateTime.UtcNow));
+            response = await _orderRepository.Create(new OrderDataModel(0, request.UserId, "Pending", DateTime.UtcNow));
+            // TODO: store order_item relation in orders_items table
 
-        // TODO: store order_item relation in orders_items table
+            _orderRepository.CloseConnectionAndCommit(transaction);
+        }
 
         return new OrderResponse(response.Id, response.Status, response.CreatedAt);
     }

@@ -38,8 +38,8 @@ public class PeriodicCleanupService : BackgroundService
                 {
                     using (IServiceScope scope = _scopeFactory.CreateScope())
                     {
-                        OrderService service = scope.ServiceProvider.GetRequiredService<OrderService>();
-                        await service.CleanupExpiredOrders(_minutesOldToDelete);
+                        OrderService orderService = scope.ServiceProvider.GetRequiredService<OrderService>();
+                        await orderService.CleanupExpiredOrders(_minutesOldToDelete);
                     }
                 }
                 catch (Exception ex)

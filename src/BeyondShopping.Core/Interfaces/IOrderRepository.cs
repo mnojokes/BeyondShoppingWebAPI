@@ -1,11 +1,14 @@
 ﻿using BeyondShopping.Core.Models;
+using System.Data;
 
 namespace BeyondShopping.Core.Interfaces;
 
 public interface IOrderRepository
 {
-    public Task<OrderDataModel> Create(OrderDataModel order);
-    public Task<OrderDataModel> UpdateStatus(OrderStatusModel status);
-    public Task<IEnumerable<OrderDataModel>> Get(int userId);
-    public Task CleanupOlderThan(DateTime time);
+    Task<OrderDataModel> Create(OrderDataModel order, IDbTransaction? transaction = null);
+    Task<OrderDataModel> UpdateStatus(OrderStatusModel status);
+    Task<IEnumerable<OrderDataModel>> Get(int userId);
+    Task CleanupOlderThan(DateTime time);
+    IDbTransaction? OpenConnectionAndStartTransaction();
+    void CloseConnectionAndCommit(IDbTransaction transaction);
 }
