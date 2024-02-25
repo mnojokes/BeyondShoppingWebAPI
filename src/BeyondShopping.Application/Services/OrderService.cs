@@ -33,11 +33,11 @@ public class OrderService
         _idValidator = idValidator;
         _createOrderRequestValidator = createOrderRequestValidator;
 
-///// Create a mock item repository. Replace with proper dependency injection if actual item inventory keeping is implemented.
+        ///// Create a mock item repository. Replace with proper dependency injection if actual item inventory keeping is implemented.
         Mock<IItemRepository> itemRepoMock = new Mock<IItemRepository>();
         itemRepoMock.Setup(r => r.Get(It.IsAny<int>())).Returns(Task.FromResult("Item"));
         _itemRepository = new Mock<IItemRepository>().Object;
-//////////
+        //////////
 
         string expiryPeriodSection = "PendingOrderExpiryTimeMinutes";
         _cleanupMinutes = int.Parse(configuration[expiryPeriodSection] ??

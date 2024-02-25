@@ -15,6 +15,10 @@ services:
     image: ${DOCKER_REGISTRY-}beyondshoppinghost
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_HTTP_PORTS=8070
+      - ASPNETCORE_HTTPS_PORTS=8071
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=B>9S7Cxp85u-
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
     build:
       context: .
       dockerfile: src/BeyondShopping.Host/Dockerfile
@@ -23,3 +27,5 @@ services:
     ports:
      - "8090:8070"
      - "8091:8071"
+    volumes:
+      - ${USERPROFILE}/.aspnet/https:/https/

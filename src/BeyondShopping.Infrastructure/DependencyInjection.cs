@@ -1,11 +1,11 @@
 ﻿using BeyondShopping.Core.Interfaces;
 using BeyondShopping.Infrastructure.Repositories;
+using Dapper;
 using DbUp;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using System.Data;
 using System.Reflection;
-using Dapper;
 
 namespace BeyondShopping.Infrastructure;
 

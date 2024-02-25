@@ -2,7 +2,6 @@
 using BeyondShopping.Core.Models;
 using Dapper;
 using System.Data;
-using System.Windows.Markup;
 
 namespace BeyondShopping.Infrastructure.Repositories;
 
@@ -42,10 +41,6 @@ public class OrderRepository : IOrderRepository
         };
 
         return await _dbConnection.QuerySingleAsync<OrderDataModel>(query, queryParameters);
-
-        //return new OrderDataModel(
-           // await _dbConnection.QuerySingleAsync<int>(query, queryParameters),
-          //  order.UserId, order.Status, order.CreatedAt);
     }
 
     public async Task<IEnumerable<OrderDataModel>> Get(int userId)
