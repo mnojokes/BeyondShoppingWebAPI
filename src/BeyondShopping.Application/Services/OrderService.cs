@@ -18,7 +18,6 @@ public class OrderService
     private readonly IItemRepository _itemRepository;
     private readonly IdValidator _idValidator;
     private readonly CreateOrderRequestValidator _createOrderRequestValidator;
-    private readonly int _cleanupMinutes;
     private readonly string _userDataRepositoryAddress;
 
     public OrderService(
@@ -38,10 +37,6 @@ public class OrderService
         itemRepoMock.Setup(r => r.Get(It.IsAny<int>())).Returns(Task.FromResult("Item"));
         _itemRepository = new Mock<IItemRepository>().Object;
         //////////
-
-        string expiryPeriodSection = "PendingOrderExpiryTimeMinutes";
-        _cleanupMinutes = int.Parse(configuration[expiryPeriodSection] ??
-            throw new ArgumentNullException(expiryPeriodSection));
 
         string userDataRepoSection = "UserDataRepositoryAddress";
         _userDataRepositoryAddress = configuration[userDataRepoSection] ??
@@ -97,9 +92,9 @@ public class OrderService
         };
     }
 
-    public async Task CleanupExpiredOrders()
+    public async Task CleanupExpiredOrders(int minutesOldToCleanUp)
     {
-        await _orderRepository.CleanupOlderThan(DateTime.UtcNow.AddMinutes(-_cleanupMinutes));
+        await _orderRepository.CleanupOlderThan(DateTime.UtcNow.AddMinutes(-minutesOldToCleanUp));
     }
 
     private void ValidateId(int id)
