@@ -13,7 +13,7 @@ public record OrderResponse
 
 public record OrderResponseList
 {
-    public List<OrderResponse>? Orders { get; init; } = null;
+    public List<OrderResponse> Orders { get; init; } = new();
 
     public OrderResponseList() { }
     public OrderResponseList(List<OrderResponse> orders)

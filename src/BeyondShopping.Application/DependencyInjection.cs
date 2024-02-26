@@ -11,14 +11,12 @@ public static class DependencyInjection
     public static void AddApplication(this IServiceCollection services)
     {
         services.AddScoped<OrderService>();
-
-        services.AddScoped<IdValidator>();
         services.AddScoped<CreateOrderRequestValidator>();
+        services.AddScoped<IdValidator>();
+        services.AddHostedService<PeriodicCleanupService>();
 
         services.AddHttpClient("ClientWithExponentialBackoff")
             .AddPolicyHandler(GetRetryPolicy());
-
-        services.AddHostedService<PeriodicCleanupService>();
     }
 
     static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()

@@ -1,4 +1,5 @@
 ﻿using BeyondShopping.Application.Validators;
+using BeyondShopping.Contracts;
 using BeyondShopping.Contracts.Requests;
 using BeyondShopping.Contracts.Responses;
 using BeyondShopping.Core.Exceptions;
@@ -16,22 +17,25 @@ public class OrderService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOrderRepository _orderRepository;
+    private readonly IOrderItemRepository _orderItemRepository;
     private readonly IItemRepository _itemRepository;
-    private readonly IdValidator _idValidator;
     private readonly CreateOrderRequestValidator _createOrderRequestValidator;
+    private readonly IdValidator _idValidator;
     private readonly string _userDataRepositoryAddress;
 
     public OrderService(
         IConfiguration configuration,
         IHttpClientFactory clientFactory,
         IOrderRepository orderRepository,
-        IdValidator idValidator,
-        CreateOrderRequestValidator createOrderRequestValidator)
+        IOrderItemRepository orderItemRepository,
+        CreateOrderRequestValidator createOrderRequestValidator,
+        IdValidator idValidator)
     {
         _httpClientFactory = clientFactory;
         _orderRepository = orderRepository;
-        _idValidator = idValidator;
+        _orderItemRepository = orderItemRepository;
         _createOrderRequestValidator = createOrderRequestValidator;
+        _idValidator = idValidator;
 
         ///// Create a mock item repository. Replace with proper dependency injection if actual item inventory keeping is implemented.
         Mock<IItemRepository> itemRepoMock = new Mock<IItemRepository>();
@@ -48,10 +52,6 @@ public class OrderService
     {
         ValidateOrderRequest(request);
         await ValidateUser(request.UserId);
-        foreach (var item in request.Items!)
-        {
-            await ValidateItem(item);
-        }
 
         OrderDataModel? response = null;
         using (IDbTransaction? transaction = _orderRepository.OpenConnectionAndStartTransaction())
@@ -61,8 +61,11 @@ public class OrderService
                 throw new InvalidOperationException("Failed to initialize database transaction.");
             }
 
-            response = await _orderRepository.Create(new OrderDataModel(0, request.UserId, "Pending", DateTime.UtcNow));
-            // TODO: store order_item relation in orders_items table
+            response = await _orderRepository.Create(new OrderDataModel(0, request.UserId, OrderStatus.Pending, DateTime.UtcNow));
+            foreach (var item in request.Items!)
+            {
+                await _orderItemRepository.Create(new OrderItemModel(response.Id, item.Id, item.Quantity));
+            }
 
             _orderRepository.CloseConnectionAndCommit(transaction);
         }
@@ -74,7 +77,7 @@ public class OrderService
     {
         ValidateId(id);
 
-        OrderDataModel response = await _orderRepository.UpdateStatus(new OrderStatusModel(id, "Completed"));
+        OrderDataModel response = await _orderRepository.UpdateStatus(new OrderStatusModel(id, OrderStatus.Completed));
         return new OrderResponse()
         {
             Id = response.Id,
@@ -103,7 +106,27 @@ public class OrderService
 
     public async Task CleanupExpiredOrders(int minutesOldToCleanUp)
     {
-        await _orderRepository.CleanupOlderThan(DateTime.UtcNow.AddMinutes(-minutesOldToCleanUp));
+        List<OrderDataModel> expiredOrders = (await _orderRepository.Get(DateTime.UtcNow.AddMinutes(-minutesOldToCleanUp), OrderStatus.Pending)).ToList();
+        if (expiredOrders.Count == 0)
+        {
+            return;
+        }
+
+        using (IDbTransaction? transaction = _orderRepository.OpenConnectionAndStartTransaction())
+        {
+            if (transaction == null)
+            {
+                throw new InvalidOperationException("Failed to initialize database transaction.");
+            }
+
+            foreach (OrderDataModel order in expiredOrders)
+            {
+                await _orderRepository.Delete(order.Id, transaction);
+                await _orderItemRepository.Delete(order.Id, transaction);
+            }
+
+            _orderRepository.CloseConnectionAndCommit(transaction);
+        }
     }
 
     private void ValidateId(int id)

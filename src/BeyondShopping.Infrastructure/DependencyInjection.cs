@@ -35,5 +35,6 @@ public static class DependencyInjection
 
         services.AddScoped<IDbConnection>(sp => new NpgsqlConnection(dbConnection));
         services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IOrderItemRepository, OrderItemRepository>();
     }
 }

@@ -11,6 +11,10 @@ string? envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 if (!string.IsNullOrEmpty(envName))
 {
     builder.Configuration.AddJsonFile($"appsettings.{envName}.json", optional: true, reloadOnChange: true);
+    if (envName == "Development")
+    {
+        builder.Configuration.AddUserSecrets<Program>();
+    }
 }
 
 // Add services to the container.

@@ -13,20 +13,6 @@ public class OrderRepository : IOrderRepository
         _dbConnection = dbConnection;
     }
 
-    public async Task CleanupOlderThan(DateTime time)
-    {
-        string query = @"DELETE FROM orders
-                        WHERE status = @status AND created_at <= @time";
-
-        var queryParameters = new
-        {
-            status = "Pending",
-            time = time
-        };
-
-        await _dbConnection.ExecuteAsync(query, queryParameters);
-    }
-
     public async Task<OrderDataModel> Create(OrderDataModel order, IDbTransaction? transaction = null)
     {
         string query = @"INSERT INTO orders (user_id, status, created_at)
@@ -43,19 +29,6 @@ public class OrderRepository : IOrderRepository
         return await _dbConnection.QuerySingleAsync<OrderDataModel>(query, queryParameters, transaction);
     }
 
-    public async Task<IEnumerable<OrderDataModel>> Get(int userId)
-    {
-        string query = @"SELECT * FROM orders
-                        WHERE user_id = @user_id";
-
-        var queryParameters = new
-        {
-            user_id = userId
-        };
-
-        return await _dbConnection.QueryAsync<OrderDataModel>(query, queryParameters);
-    }
-
     public async Task<OrderDataModel> UpdateStatus(OrderStatusModel status)
     {
         string query = @"UPDATE orders
@@ -70,6 +43,51 @@ public class OrderRepository : IOrderRepository
         };
 
         return await _dbConnection.QuerySingleAsync<OrderDataModel>(query, queryParameters);
+    }
+
+    public async Task<IEnumerable<OrderDataModel>> Get(int userId)
+    {
+        string query = @"SELECT * FROM orders
+                        WHERE user_id = @user_id";
+
+        var queryParameters = new
+        {
+            user_id = userId
+        };
+
+        return await _dbConnection.QueryAsync<OrderDataModel>(query, queryParameters);
+    }
+
+    public async Task<IEnumerable<OrderDataModel>> Get(DateTime before, string? withStatus = null)
+    {
+        string query = @"SELECT * FROM orders
+                        WHERE created_at <= @date";
+
+        if (!string.IsNullOrEmpty(withStatus))
+        {
+            query += " AND status = @status";
+        }
+
+        var queryParameters = new
+        {
+            date = before,
+            status = withStatus
+        };
+
+        return await _dbConnection.QueryAsync<OrderDataModel>(query, queryParameters);
+    }
+
+    public async Task Delete(int id, IDbTransaction? transaction = null)
+    {
+        string query = @"DELETE FROM orders
+                        WHERE id = @id";
+
+        var queryParameters = new
+        {
+            id = id
+        };
+
+        await _dbConnection.ExecuteAsync(query, queryParameters, transaction);
     }
 
     public IDbTransaction? OpenConnectionAndStartTransaction()
