@@ -121,8 +121,8 @@ public class OrderService
 
             foreach (OrderDataModel order in expiredOrders)
             {
-                await _orderRepository.Delete(order.Id, transaction);
                 await _orderItemRepository.Delete(order.Id, transaction);
+                await _orderRepository.Delete(order.Id, transaction);
             }
 
             _orderRepository.CloseConnectionAndCommit(transaction);
