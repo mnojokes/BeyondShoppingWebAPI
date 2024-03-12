@@ -1,5 +1,9 @@
 using BeyondShopping.Application.Services;
 using BeyondShopping.Application.Validators;
+using BeyondShopping.Contracts.Objects;
+using BeyondShopping.Contracts.Requests;
+using BeyondShopping.Contracts.Responses;
+using BeyondShopping.Core.Exceptions;
 using BeyondShopping.Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -34,8 +38,10 @@ public class OrderServiceTests
     }
 
     [Fact]
-    public void Test1()
+    public async Task CreateOrder_GivenInvalidRequest_ThrowsDataValidationException()
     {
-
+        CreateOrderRequest request = new CreateOrderRequest(-1, new List<ItemData>());
+        await Assert.ThrowsAsync<DataValidationException>(async () => await _orderService.CreateOrder(request));
+        _orderRepositoryMock.Verify(r => r.OpenConnectionAndStartTransaction(), Times.Never());
     }
 }
