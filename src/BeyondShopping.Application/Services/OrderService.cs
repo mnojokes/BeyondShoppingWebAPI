@@ -1,5 +1,6 @@
 ﻿using BeyondShopping.Application.Validators;
 using BeyondShopping.Contracts;
+using BeyondShopping.Contracts.Objects;
 using BeyondShopping.Contracts.Requests;
 using BeyondShopping.Contracts.Responses;
 using BeyondShopping.Core.Exceptions;
@@ -7,7 +8,6 @@ using BeyondShopping.Core.Interfaces;
 using BeyondShopping.Core.Models;
 using BeyondShopping.Core.Utilities;
 using FluentValidation.Results;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Data;
 
@@ -15,23 +15,21 @@ namespace BeyondShopping.Application.Services;
 
 public class OrderService
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IUserRepository _userRepository;
     private readonly IOrderRepository _orderRepository;
     private readonly IOrderItemRepository _orderItemRepository;
     private readonly IItemRepository _itemRepository;
     private readonly CreateOrderRequestValidator _createOrderRequestValidator;
     private readonly IdValidator _idValidator;
-    private readonly string _userDataRepositoryAddress;
 
     public OrderService(
-        IConfiguration configuration,
-        IHttpClientFactory clientFactory,
+        IUserRepository userRepository,
         IOrderRepository orderRepository,
         IOrderItemRepository orderItemRepository,
         CreateOrderRequestValidator createOrderRequestValidator,
         IdValidator idValidator)
     {
-        _httpClientFactory = clientFactory;
+        _userRepository = userRepository;
         _orderRepository = orderRepository;
         _orderItemRepository = orderItemRepository;
         _createOrderRequestValidator = createOrderRequestValidator;
@@ -42,10 +40,6 @@ public class OrderService
         itemRepoMock.Setup(r => r.Get(It.IsAny<int>())).Returns(Task.FromResult("Item"));
         _itemRepository = new Mock<IItemRepository>().Object;
         //////////
-
-        string userDataRepoSection = "UserDataRepositoryAddress";
-        _userDataRepositoryAddress = configuration[userDataRepoSection] ??
-            throw new ArgumentNullException(userDataRepoSection);
     }
 
     public async Task<OrderResponse> CreateOrder(CreateOrderRequest request)
@@ -149,20 +143,19 @@ public class OrderService
 
     private async Task ValidateUser(int id)
     {
-        HttpClient client = _httpClientFactory.CreateClient("ClientWithExponentialBackoff");
-
+        UserData? user = null;
         try
         {
-            var response = await client.GetAsync($"{_userDataRepositoryAddress}/{id}");
-            response.EnsureSuccessStatusCode();
+            user = await _userRepository.Get(id);
         }
-        catch (HttpRequestException)
+        catch (Exception ex)
+        {
+            throw new Exception($"Error validating user data: {ex.Message}");
+        }
+
+        if (user is null)
         {
             throw new UserNotFoundException($"User with id {id} does not exist.");
-        }
-        catch
-        {
-            throw new Exception("Error validating user data.");
         }
     }
 

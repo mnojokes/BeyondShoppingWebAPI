@@ -4,6 +4,8 @@ using Dapper;
 using DbUp;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Polly;
+using Polly.Extensions.Http;
 using System.Data;
 using System.Reflection;
 
@@ -34,7 +36,19 @@ public static class DependencyInjection
         }
 
         services.AddScoped<IDbConnection>(sp => new NpgsqlConnection(dbConnection));
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IOrderItemRepository, OrderItemRepository>();
+
+        services.AddHttpClient("ClientWithExponentialBackoff")
+            .AddPolicyHandler(GetRetryPolicy());
+    }
+
+    static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+    {
+        return HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .WaitAndRetryAsync(3, retryAttempt =>
+                TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
     }
 }

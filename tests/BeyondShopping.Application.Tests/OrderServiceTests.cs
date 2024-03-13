@@ -2,17 +2,15 @@ using BeyondShopping.Application.Services;
 using BeyondShopping.Application.Validators;
 using BeyondShopping.Contracts.Objects;
 using BeyondShopping.Contracts.Requests;
-using BeyondShopping.Contracts.Responses;
 using BeyondShopping.Core.Exceptions;
 using BeyondShopping.Core.Interfaces;
-using Microsoft.Extensions.Configuration;
 using Moq;
 
 namespace BeyondShopping.Application.Tests;
 
 public class OrderServiceTests
 {
-    private Mock<IHttpClientFactory> _httpClientFactoryMock;
+    private Mock<IUserRepository> _userRepositoryMock;
     private Mock<IOrderRepository> _orderRepositoryMock;
     private Mock<IOrderItemRepository> _orderItemRepositoryMock;
 
@@ -20,16 +18,15 @@ public class OrderServiceTests
 
     public OrderServiceTests()
     {
-        Mock<IConfiguration> configurationMock = new Mock<IConfiguration>();
-        configurationMock.Setup(x => x["UserDataRepositoryAddress"]).Returns("ConnectionString");
+        //Mock<IConfiguration> configurationMock = new Mock<IConfiguration>();
+        //configurationMock.Setup(x => x["UserDataRepositoryAddress"]).Returns("ConnectionString");
 
-        _httpClientFactoryMock = new Mock<IHttpClientFactory>();
+        _userRepositoryMock = new Mock<IUserRepository>();
         _orderRepositoryMock = new Mock<IOrderRepository>();
         _orderItemRepositoryMock = new Mock<IOrderItemRepository>();
 
         _orderService = new OrderService(
-            configurationMock.Object,
-            _httpClientFactoryMock.Object,
+            _userRepositoryMock.Object,
             _orderRepositoryMock.Object,
             _orderItemRepositoryMock.Object,
             new CreateOrderRequestValidator(),
