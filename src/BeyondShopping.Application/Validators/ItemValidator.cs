@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace BeyondShopping.Application.Validators;
 
-public class ItemValidator : AbstractValidator<ItemData>
+public class ItemValidator : AbstractValidator<OrderItem>
 {
     public ItemValidator()
     {

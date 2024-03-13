@@ -1,11 +1,11 @@
 ﻿namespace BeyondShopping.Contracts.Objects;
 
-public record ItemData
+public record OrderItem
 {
     public int Id { get; init; } = default;
     public int Quantity { get; init; } = default;
 
-    public ItemData() { }
-    public ItemData(int id, int quantity)
+    public OrderItem() { }
+    public OrderItem(int id, int quantity)
         => (Id, Quantity) = (id, quantity);
 }

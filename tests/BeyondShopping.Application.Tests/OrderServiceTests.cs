@@ -37,7 +37,7 @@ public class OrderServiceTests
     [Fact]
     public async Task CreateOrder_GivenInvalidRequest_ThrowsDataValidationException()
     {
-        CreateOrderRequest request = new CreateOrderRequest(-1, new List<ItemData>());
+        CreateOrderRequest request = new CreateOrderRequest(-1, new List<OrderItem>());
         await Assert.ThrowsAsync<DataValidationException>(async () => await _orderService.CreateOrder(request));
         _orderRepositoryMock.Verify(r => r.OpenConnectionAndStartTransaction(), Times.Never());
     }

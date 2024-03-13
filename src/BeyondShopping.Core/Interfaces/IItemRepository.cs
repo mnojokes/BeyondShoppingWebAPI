@@ -1,6 +1,8 @@
-﻿namespace BeyondShopping.Core.Interfaces;
+﻿using BeyondShopping.Contracts.Objects;
+
+namespace BeyondShopping.Core.Interfaces;
 
 public interface IItemRepository
 {
-    Task<string> Get(int id); // TODO: change to actual object type if inventory will be kept
+    Task<OrderItem?> Get(int id);
 }

@@ -37,8 +37,9 @@ public class OrderService
 
         ///// Create a mock item repository. Replace with proper dependency injection if actual item inventory keeping is implemented.
         Mock<IItemRepository> itemRepoMock = new Mock<IItemRepository>();
-        itemRepoMock.Setup(r => r.Get(It.IsAny<int>())).Returns(Task.FromResult("Item"));
-        _itemRepository = new Mock<IItemRepository>().Object;
+        itemRepoMock.Setup(r => r.Get(It.Is<int>(id => id >= 1 && id <= 100))).Returns((int id) => Task.FromResult<OrderItem?>(new OrderItem(id, id + 10)));
+        itemRepoMock.Setup(r => r.Get(It.Is<int>(id => id < 1 || id > 100))).Returns(Task.FromResult<OrderItem?>(null));
+        _itemRepository = itemRepoMock.Object;
         //////////
     }
 
@@ -46,6 +47,7 @@ public class OrderService
     {
         ValidateOrderRequest(request);
         await ValidateUser(request.UserId);
+        await ValidateItems(request.Items);
 
         OrderDataModel? response = null;
         using (IDbTransaction? transaction = _orderRepository.OpenConnectionAndStartTransaction())
@@ -159,15 +161,29 @@ public class OrderService
         }
     }
 
-    private async Task ValidateItem(int id)
+    private async Task ValidateItems(List<OrderItem> items)
     {
+        List<int> invalidIds = new List<int>();
+
         try
         {
-            await _itemRepository.Get(id);
+            foreach (OrderItem item in items)
+            {
+                OrderItem? dbItem = await _itemRepository.Get(item.Id);
+                if (dbItem is null)
+                {
+                    invalidIds.Add(item.Id);
+                }
+            }
         }
-        catch
+        catch (Exception ex)
         {
-            throw new Exception("Item does not exist.");
+            throw new Exception($"Error validating item(s): {ex.Message}");
+        }
+
+        if (invalidIds.Count != 0)
+        {
+            throw new ItemNotFoundException($"Item id(s) not found: {string.Join(", ", invalidIds)}");
         }
     }
 }

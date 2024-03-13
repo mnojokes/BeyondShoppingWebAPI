@@ -13,11 +13,11 @@ public class CreateOrderRequestExample : IExamplesProvider<CreateOrderRequest>
         return new CreateOrderRequest()
         {
             UserId = 123,
-            Items = new List<ItemData>()
+            Items = new List<OrderItem>()
             {
-                new ItemData(3, 12),
-                new ItemData(12, 48),
-                new ItemData(1, 4)
+                new OrderItem(3, 12),
+                new OrderItem(12, 48),
+                new OrderItem(1, 4)
             }
         };
     }
