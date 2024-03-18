@@ -33,6 +33,7 @@ public class ExceptionHandlingMiddleware
                 DataNotFoundException => (int)HttpStatusCode.NotFound,
                 UserNotFoundException => (int)HttpStatusCode.BadRequest,
                 ItemNotFoundException => (int)HttpStatusCode.BadRequest,
+                OrderNotFoundException => (int)HttpStatusCode.BadRequest,
                 DataValidationException => (int)HttpStatusCode.BadRequest,
                 InvalidOperationException => (int)HttpStatusCode.BadRequest,
                 _ => (int)HttpStatusCode.InternalServerError

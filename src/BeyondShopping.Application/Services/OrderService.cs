@@ -37,8 +37,8 @@ public class OrderService
 
         ///// Create a mock item repository. Replace with proper dependency injection if actual item inventory keeping is implemented.
         Mock<IItemRepository> itemRepoMock = new Mock<IItemRepository>();
-        itemRepoMock.Setup(r => r.Get(It.Is<int>(id => id >= 1 && id <= 100))).Returns((int id) => Task.FromResult<OrderItem?>(new OrderItem(id, id + 10)));
-        itemRepoMock.Setup(r => r.Get(It.Is<int>(id => id < 1 || id > 100))).Returns(Task.FromResult<OrderItem?>(null));
+        itemRepoMock.Setup(r => r.Get(It.Is<int>(id => id >= 1 && id <= 10))).Returns((int id) => Task.FromResult<OrderItem?>(new OrderItem(id, id + 10)));
+        itemRepoMock.Setup(r => r.Get(It.Is<int>(id => id < 1 || id > 10))).Returns(Task.FromResult<OrderItem?>(null));
         _itemRepository = itemRepoMock.Object;
         //////////
     }
@@ -73,7 +73,13 @@ public class OrderService
     {
         ValidateId(id);
 
-        OrderDataModel response = await _orderRepository.UpdateStatus(new OrderStatusModel(id, OrderStatus.Completed));
+        // TODO: refactor to check if order is expired and prevent completion if so
+        OrderDataModel? response = await _orderRepository.UpdateStatus(new OrderStatusModel(id, OrderStatus.Completed));
+        if (response == null)
+        {
+            throw new OrderNotFoundException($"Order with id {id} does not exist.");
+        }
+
         return new OrderResponse()
         {
             Id = response.Id,
