@@ -8,6 +8,7 @@ using BeyondShopping.Core.Exceptions;
 using BeyondShopping.Core.Interfaces;
 using BeyondShopping.Core.Models;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Data;
 
@@ -15,30 +16,38 @@ namespace BeyondShopping.Application.Tests;
 
 public class OrderServiceTests
 {
+    private Mock<IConfiguration> _configurationMock;
     private Mock<IUserRepository> _userRepositoryMock;
     private Mock<IOrderRepository> _orderRepositoryMock;
     private Mock<IOrderItemRepository> _orderItemRepositoryMock;
 
     private const int _validIdFrom = 1;
     private const int _validIdTo = 10;
+    private const string _expiryTimeMinutes = "120";
 
     private readonly OrderService _orderService;
 
     public OrderServiceTests()
     {
+        _configurationMock = new Mock<IConfiguration>();
         _userRepositoryMock = new Mock<IUserRepository>();
         _orderRepositoryMock = new Mock<IOrderRepository>();
         _orderItemRepositoryMock = new Mock<IOrderItemRepository>();
+
+        _configurationMock.Setup(c => c["PendingOrderExpiryTimeMinutes"]).Returns(_expiryTimeMinutes);
 
         _userRepositoryMock.Setup(r => r.Get(It.Is<int>(id => id >= _validIdFrom && id <= _validIdTo))).Returns((int id) => Task.FromResult<UserData?>(new UserData(id, "TestName", "TestUsername", "TestEmail")));
         _userRepositoryMock.Setup(r => r.Get(It.Is<int>(id => id < _validIdFrom || id > _validIdTo))).Returns(Task.FromResult<UserData?>(null));
 
         _orderRepositoryMock.Setup(r => r.OpenConnectionAndStartTransaction()).Returns(new Mock<IDbTransaction>().Object);
-        _orderRepositoryMock.Setup(r => r.Create(It.IsAny<OrderDataModel>(), It.IsAny<IDbTransaction>())).Returns(Task.FromResult(new OrderDataModel(1, 1, OrderStatus.Pending, DateTime.Now)));
-        _orderRepositoryMock.Setup(r => r.UpdateStatus(It.Is<OrderStatusModel>(osm => osm.Id >= _validIdFrom && osm.Id <= _validIdTo))).Returns((OrderStatusModel osm) => Task.FromResult<OrderDataModel?>(new OrderDataModel(osm.Id, 0, osm.Status, DateTime.Now)));
-        _orderRepositoryMock.Setup(r => r.UpdateStatus(It.Is<OrderStatusModel>(osm => osm.Id < _validIdFrom && osm.Id > _validIdTo))).Returns(Task.FromResult<OrderDataModel?>(null));
+        _orderRepositoryMock.Setup(r => r.Create(It.IsAny<OrderDataModel>(), It.IsAny<IDbTransaction>())).Returns(Task.FromResult(new OrderDataModel(1, 1, OrderStatus.Pending, DateTime.UtcNow)));
+        _orderRepositoryMock.Setup(r => r.UpdateStatus(It.Is<OrderStatusModel>(osm => osm.Id >= _validIdFrom && osm.Id <= _validIdTo))).Returns((OrderStatusModel osm) => Task.FromResult(new OrderDataModel(osm.Id, 0, osm.Status, DateTime.UtcNow)));
+        _orderRepositoryMock.Setup(r => r.UpdateStatus(It.Is<OrderStatusModel>(osm => osm.Id < _validIdFrom || osm.Id > _validIdTo))).Throws<InvalidOperationException>();
+        _orderRepositoryMock.Setup(r => r.Get(It.Is<int>(id => id >= _validIdFrom && id <= _validIdTo))).Returns((int id) => Task.FromResult<OrderDataModel?>(new OrderDataModel(id, 0, OrderStatus.Pending, DateTime.UtcNow)));
+        _orderRepositoryMock.Setup(r => r.Get(It.Is<int>(id => id < _validIdFrom || id > _validIdTo))).Returns(Task.FromResult<OrderDataModel?>(null));
 
         _orderService = new OrderService(
+            _configurationMock.Object,
             _userRepositoryMock.Object,
             _orderRepositoryMock.Object,
             _orderItemRepositoryMock.Object,
@@ -163,8 +172,19 @@ public class OrderServiceTests
         Func<Task> act = async () => await _orderService.CompleteOrder(nonexistentId);
 
         await act.Should().ThrowAsync<OrderNotFoundException>();
-        _orderRepositoryMock.Verify(r => r.UpdateStatus(It.IsAny<OrderStatusModel>()), Times.Once());
+        _orderRepositoryMock.Verify(r => r.Get(nonexistentId), Times.Once());
+        _orderRepositoryMock.Verify(r => r.UpdateStatus(It.IsAny<OrderStatusModel>()), Times.Never());
     }
 
-    // TODO: add expired order flow test when implemented
+    [Fact]
+    public async Task CompleteOrder_GivenExpiredOrderId_ThrowsOrderNotFoundException()
+    {
+        int minutesToExpiry = int.Parse(_expiryTimeMinutes);
+        _orderRepositoryMock.Setup(r => r.Get(_validIdFrom)).Returns(Task.FromResult<OrderDataModel?>(new OrderDataModel(_validIdFrom, 0, OrderStatus.Pending, DateTime.UtcNow.AddMinutes(-minutesToExpiry))));
+        Func<Task> act = async () => await _orderService.CompleteOrder(_validIdFrom);
+
+        await act.Should().ThrowAsync<OrderNotFoundException>();
+        _orderRepositoryMock.Verify(r => r.Get(_validIdFrom), Times.Once());
+        _orderRepositoryMock.Verify(r => r.UpdateStatus(It.IsAny<OrderStatusModel>()), Times.Never());
+    }
 }

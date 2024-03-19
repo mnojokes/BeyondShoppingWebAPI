@@ -8,7 +8,6 @@ public class PeriodicCleanupService : BackgroundService
 {
     IServiceScopeFactory _scopeFactory;
     private readonly TimeSpan _period;
-    private readonly int _minutesOldToDelete;
 
 
     public PeriodicCleanupService(IConfiguration configuration, IServiceScopeFactory scopeFactory)
@@ -17,10 +16,6 @@ public class PeriodicCleanupService : BackgroundService
         if (!double.TryParse(configuration["PeriodicCleanupIntervalMinutes"], out cleanupPeriod))
         {
             throw new ArgumentNullException("PeriodicCleanupIntervalMinutes");
-        }
-        if (!int.TryParse(configuration["PendingOrderExpiryTimeMinutes"], out _minutesOldToDelete))
-        {
-            throw new ArgumentNullException("PendingOrderExpiryTimeMinutes");
         }
 
         _period = TimeSpan.FromMinutes(cleanupPeriod);
@@ -39,7 +34,7 @@ public class PeriodicCleanupService : BackgroundService
                     using (IServiceScope scope = _scopeFactory.CreateScope())
                     {
                         OrderService orderService = scope.ServiceProvider.GetRequiredService<OrderService>();
-                        await orderService.CleanupExpiredOrders(_minutesOldToDelete);
+                        await orderService.CleanupExpiredOrders();
                     }
                 }
                 catch (Exception ex)

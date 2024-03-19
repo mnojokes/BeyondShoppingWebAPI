@@ -8,6 +8,7 @@ using BeyondShopping.Core.Interfaces;
 using BeyondShopping.Core.Models;
 using BeyondShopping.Core.Utilities;
 using FluentValidation.Results;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Data;
 
@@ -22,7 +23,10 @@ public class OrderService
     private readonly CreateOrderRequestValidator _createOrderRequestValidator;
     private readonly IdValidator _idValidator;
 
+    private readonly int _orderExpiryTimeMinutes;
+
     public OrderService(
+        IConfiguration configuration,
         IUserRepository userRepository,
         IOrderRepository orderRepository,
         IOrderItemRepository orderItemRepository,
@@ -34,6 +38,12 @@ public class OrderService
         _orderItemRepository = orderItemRepository;
         _createOrderRequestValidator = createOrderRequestValidator;
         _idValidator = idValidator;
+
+        const string configSection = "PendingOrderExpiryTimeMinutes";
+        if (!int.TryParse(configuration[configSection], out _orderExpiryTimeMinutes))
+        {
+            throw new ArgumentNullException(configSection);
+        }
 
         ///// Create a mock item repository. Replace with proper dependency injection if actual item inventory keeping is implemented.
         Mock<IItemRepository> itemRepoMock = new Mock<IItemRepository>();
@@ -72,19 +82,21 @@ public class OrderService
     public async Task<OrderResponse> CompleteOrder(int id)
     {
         ValidateId(id);
+        DateTime expiryTime = DateTime.UtcNow.AddMinutes(-_orderExpiryTimeMinutes);
 
-        // TODO: refactor to check if order is expired and prevent completion if so
-        OrderDataModel? response = await _orderRepository.UpdateStatus(new OrderStatusModel(id, OrderStatus.Completed));
-        if (response == null)
+        OrderDataModel? order = await _orderRepository.Get(id);
+        if (order == null || order.CreatedAt <= expiryTime)
         {
             throw new OrderNotFoundException($"Order with id {id} does not exist.");
         }
 
+        order = await _orderRepository.UpdateStatus(new OrderStatusModel(id, OrderStatus.Completed));
+
         return new OrderResponse()
         {
-            Id = response.Id,
-            Status = response.Status,
-            CreatedAt = response.CreatedAt
+            Id = order.Id,
+            Status = order.Status,
+            CreatedAt = order.CreatedAt
         };
     }
 
@@ -93,7 +105,7 @@ public class OrderService
         ValidateId(userId);
         await ValidateUser(userId);
 
-        List<OrderDataModel> orders = (await _orderRepository.Get(userId)).ToList();
+        List<OrderDataModel> orders = (await _orderRepository.GetByUser(userId)).ToList();
 
         return new OrderResponseList()
         {
@@ -106,9 +118,9 @@ public class OrderService
         };
     }
 
-    public async Task CleanupExpiredOrders(int minutesOldToCleanUp)
+    public async Task CleanupExpiredOrders()
     {
-        List<OrderDataModel> expiredOrders = (await _orderRepository.Get(DateTime.UtcNow.AddMinutes(-minutesOldToCleanUp), OrderStatus.Pending)).ToList();
+        List<OrderDataModel> expiredOrders = (await _orderRepository.Get(DateTime.UtcNow.AddMinutes(-_orderExpiryTimeMinutes), OrderStatus.Pending)).ToList();
         if (expiredOrders.Count == 0)
         {
             return;

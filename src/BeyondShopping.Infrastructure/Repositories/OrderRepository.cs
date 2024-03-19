@@ -29,7 +29,7 @@ public class OrderRepository : IOrderRepository
         return await _dbConnection.QuerySingleAsync<OrderDataModel>(query, queryParameters, transaction);
     }
 
-    public async Task<OrderDataModel?> UpdateStatus(OrderStatusModel status)
+    public async Task<OrderDataModel> UpdateStatus(OrderStatusModel status)
     {
         string query = @"UPDATE orders
                         SET status = @status
@@ -42,10 +42,10 @@ public class OrderRepository : IOrderRepository
             status = status.Status
         };
 
-        return await _dbConnection.QuerySingleOrDefaultAsync<OrderDataModel>(query, queryParameters);
+        return await _dbConnection.QuerySingleAsync<OrderDataModel>(query, queryParameters);
     }
 
-    public async Task<IEnumerable<OrderDataModel>> Get(int userId)
+    public async Task<IEnumerable<OrderDataModel>> GetByUser(int userId)
     {
         string query = @"SELECT * FROM orders
                         WHERE user_id = @user_id";
@@ -56,6 +56,19 @@ public class OrderRepository : IOrderRepository
         };
 
         return await _dbConnection.QueryAsync<OrderDataModel>(query, queryParameters);
+    }
+
+    public async Task<OrderDataModel?> Get(int id)
+    {
+        string query = @"SELECT * FROM orders
+                        WHERE id = @id";
+
+        var queryParameters = new
+        {
+            id = id
+        };
+
+        return await _dbConnection.QuerySingleOrDefaultAsync<OrderDataModel>(query, queryParameters);
     }
 
     public async Task<IEnumerable<OrderDataModel>> Get(DateTime before, string? withStatus = null)
